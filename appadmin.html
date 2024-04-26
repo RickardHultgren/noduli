@@ -1,0 +1,42 @@
+<!-- appadmin.html -->
+
+{{extend 'layout.html'}}
+
+<div class="container">
+		<h2>User Account Information</h2>
+		<p>Number of user accounts: {{=user_count}}</p>
+
+		<h2>Manage Nodes</h2>
+		<div class="form-container">
+				{{=form}}
+		</div>
+
+		{% if user_nodes: %}
+				<h3>Nodes for Selected User</h3>
+				<table class="table table-striped">
+						<thead>
+								<tr>
+										<th>ID</th>
+										<th>Name</th>
+										<th>ICD9</th>
+										<th>Data Type</th>
+										<th>Actions</th>
+								</tr>
+						</thead>
+						<tbody>
+								{% for node in user_nodes: %}
+										<tr>
+												<td>{{=node.id}}</td>
+												<td>{{=node.name}}</td>
+												<td>{{=node.ICD9}}</td>
+												<td>{{=node.data_type}}</td>
+												<td>
+														<a href="{{=URL('edit_node', args=node.id)}}" class="btn btn-info">Edit</a>
+														<a href="{{=URL('delete_node', args=node.id)}}" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+												</td>
+										</tr>
+								{% endfor %}
+						</tbody>
+				</table>
+		{% endif %}
+</div>

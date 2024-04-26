@@ -1,0 +1,481 @@
+{{#import time}}
+<style>
+				#graph-container {
+						border: 4px solid green;
+						padding: 4px;
+						font-color:black;
+				}
+		</style>
+<style>
+		#output {
+				margin-top: 0;
+				padding: 0;
+				border: 4px solid blue;
+				position: relative;
+				background-color: yellow;
+				width: 45%;
+				height: 100%;
+		}
+
+		#canvas {
+				margin-top: 0;
+				padding: 0;
+				border: 4px solid blue;
+				position: relative;
+				background-color: none;
+				width: 100%;
+				height: 100%;
+		}
+
+</style>
+<style>
+						font-color:black;
+
+		</style>
+<script>
+/**
+*
+*  Base64 encode / decode
+*  http://www.webtoolkit.info
+*
+<!-- Add a button to trigger the image copy -->
+<button id="copyButton">Copy Graph Image</button>
+<script>
+		document.getElementById('copyButton').addEventListener('click', copyGraphToClipboardWithSvgToPng);
+
+		// ... (your existing code)
+
+		// Function to copy SVG to PNG and trigger download
+		function copyGraphToClipboardWithSvgToPng() {
+				// Get the graph container element
+				var graphContainer = document.getElementById('graph-container');
+
+				// Convert the SVG content to a data URL
+				var svgString = new XMLSerializer().serializeToString(graphContainer);
+				var dataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+
+				// Create an Image element
+				var img = new Image();
+
+				// Set the Image source to the data URL
+				img.src = dataUrl;
+
+				// Wait for the Image to load
+				img.onload = function () {
+						// Create a Canvas element
+						var canvas = document.createElement('canvas');
+						canvas.width = img.width;
+						canvas.height = img.height;
+
+						// Get the 2D rendering context
+						var context = canvas.getContext('2d');
+
+						// Draw the Image on the Canvas
+						context.drawImage(img, 0, 0);
+
+						// Convert the Canvas to a data URL (base64)
+						var base64ImageData = canvas.toDataURL('image/png');
+
+						// Convert the base64 image to a Blob
+						var blob = dataURItoBlob(base64ImageData);
+
+						// Use the Clipboard API to copy to clipboard
+						navigator.clipboard.write([
+								new ClipboardItem({ "image/png": blob })
+						]).then(function () {
+								// Alert the user (you can customize this part)
+								alert('Graph content copied to clipboard as PNG.');
+						}).catch(function (err) {
+								// Handle errors
+								console.error('Unable to copy to clipboard', err);
+						});
+
+						// Download the PNG file
+						downloadSvg(graphContainer, 'graph.png');
+				};
+		}
+</script>
+
+
+
+
+
+
+<style>
+		.link {
+				marker-end: url(#arrow);
+				stroke: #666; /* Line color */
+				stroke-width: 4; /* Line width */
+		}
+</style>
+	<script src=
+"https://cdn.jsdelivr.net/npm/html2canvas@1.0.0-rc.5/dist/html2canvas.min.js">
+	</script>
+				<button onclick="takeshot()">
+						Take Screenshot
+				</button>
+
+		<div id="graph-container" style="width:45%; height:100%;"></div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+
+
+
+<script>
+//    if (nodes !== undefined) {
+//            var nodes = {{=XML(response.jsonNodes)}};
+//            // The variable exists
+//    } else {
+						// The variable is undefined
+//            nodes = {{=session.nodes}};
+//    }
+//    if (links !== undefined) {
+//            var links = {{=XML(response.jsonLinks)}};
+						// The variable exists
+//    } else {
+						// The variable is undefined
+//            links = {{=session.links}};
+//    }
+
+		// Sample data for nodes and links
+
+		//var nodes = {{=XML(response.jsonNodes)}};
+		//var links = {{=XML(response.jsonLinks)}};
+		var nodes = {{=XML(nodes)}};
+		var links = {{=XML(links)}};
+		//alert(links);
+		//alert(nodes);
+		// Set up SVG container and zoom behavior
+		var svg = d3.select("#graph-container")
+				.append("svg")
+				.attr("width", "100%")
+				.attr("height", "100%");
+
+		var g = svg.append("g");
+
+		var zoom = d3.zoom()
+				.scaleExtent([0.2, 4])
+				.on("zoom", zoomed);
+
+
+		// Initialize the simulation with modified force parameters
+var simulation = d3.forceSimulation()
+		.force("link", d3.forceLink().id(function(d) { return d.id; }).distance(50)) // Adjust the distance value as needed
+		.force("charge", d3.forceManyBody().strength(-1000))  // Adjust this value as needed
+		.force("center", d3.forceCenter(window.innerWidth / 2, window.innerHeight / 2));
+
+		// Initialize the simulation
+		//var simulation = d3.forceSimulation()
+		//    .force("link", d3.forceLink().id(function(d) { return d.id; }))
+		//    .force("charge", d3.forceManyBody())
+		//    .force("center", d3.forceCenter(window.innerWidth / 2, window.innerHeight / 2));
+
+
+
+
+// Add arrowhead marker
+svg.append("defs").append("marker")
+		.attr("id", "arrow")
+		.attr("viewBox", "0 -5 10 10")
+		.attr("refX", 8)
+		.attr("refY", 0)
+		.attr("markerWidth", 6)
+		.attr("markerHeight", 6)
+		.attr("orient", "auto")
+		.append("path")
+		.attr("d", "M0,-5L10,0L0,5");
+
+// Add nodes and links to the simulation
+//var node = g.selectAll(".node")
+//    .data(nodes)
+//    .enter().append("g")
+//    .attr("class", "node")
+//    .call(d3.drag()
+//        .on("start", dragstarted)
+//        .on("drag", dragged)
+//        .on("end", dragended));
+
+//node.append("rect")
+//    .attr("width", 80)
+//    .attr("height", 40)
+//    .attr("class", "node");
+
+//node.append("text")
+//    .attr("dy", "1.3em")
+//    .attr("x", 40)
+//    .style("text-anchor", "middle")
+//    .text(function(d) { return d.label; });
+
+// Add nodes and links to the simulation
+var node = g.selectAll(".node")
+		.data(nodes)
+		.enter().append("g")
+		.attr("class", "node")
+		.attr("fill", "lightgrey")
+		.call(d3.drag()
+				.on("start", dragstarted)
+				.on("drag", dragged)
+				.on("end", dragended))
+		.on("click", nodeClicked); // Add click event listener
+
+node.append("rect")
+		.attr("width", 80)
+		.attr("height", 40)
+		.attr("class", "node");
+
+node.append("text")
+		.attr("dy", "1.3em")
+		.attr("x", 40)
+		.style("text-anchor", "middle")
+		.style("fill", "black")  // Set the text fill color to black
+		.text(function(d) { return d.label; });
+
+//function nodeClicked(d) {
+		// Toggle the color of the clicked node
+//    d3.select(this)
+//        .select("rect")
+//        .style("fill", function() {
+//            return d3.select(this).style("fill") === "green" ? "grey" : "green";
+//        });
+function nodeClicked(d) {
+		// Toggle the color of the clicked node
+		var rect = d3.select(this).select("rect");
+		var currentColor = rect.style("fill");
+
+		if (currentColor !== "lightgreen") {
+				rect.style("fill", "lightgreen");
+		} else {
+				rect.style("fill", "lightgrey");
+		}
+}
+
+		//simulation.on("tick", function() {
+		//    link
+		//        .attr("x1", function(d) { return d.source.x; })
+		//        .attr("y1", function(d) { return d.source.y; })
+		//        .attr("x2", function(d) { return d.target.x; })
+		//        .attr("y2", function(d) { return d.target.y; });
+
+//        node
+	//          .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+		//});
+
+		// Zoom function
+		function zoomed() {
+				g.attr("transform", d3.event.transform);
+		}
+		svg.call(zoom);
+
+		// Drag functions
+// Drag functions
+function dragstarted(d) {
+		if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+		d.fx = d.x;
+		d.fy = d.y;
+}
+
+function dragged(d) {
+		d.fx = d3.event.x;
+		d.fy = d3.event.y;
+}
+
+function dragended(d) {
+		if (!d3.event.active) simulation.alphaTarget(0);
+		// Fix the node's position after dragging
+		d.fx = d.x;
+		d.fy = d.y;
+}
+
+		// Create links
+//var link = g.selectAll(".link")
+//    .data(links)
+//    .enter().append("path")
+//    .attr("class", "link")
+//    .attr("marker-end", "url(#arrow)")
+//    .style("stroke", "#666")
+//    .style("stroke-width", function(d) { return Math.sqrt(d.value); }) // Dynamic stroke-width
+//    .attr("fill", "lightgrey")
+//    .attr("d", function(d) {
+//        var dx = d.target.x - d.source.x,
+//            dy = d.target.y - d.source.y,
+//            dr = Math.sqrt(dx * dx + dy * dy);
+//        return "M" + d.source.x + "," + d.source.y +
+//               "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+//    })
+//    .on("mouseover", function(d) {
+//        console.log("Mouseover on link:", d);
+//        // Add any additional debugging or visualization code here
+//    });
+
+var link = g.selectAll(".link")
+		.data(links)
+		.enter().append("path")
+		.attr("class", "link")
+		.attr("marker-end", "url(#arrow)")
+		.style("stroke", "#666")
+		.style("stroke-width", function (d) { return Math.sqrt(d.value); }) // Dynamic stroke-width
+		.attr("fill", "lightgrey")
+		.attr("d", function (d) {
+				var sourceNode = nodes.find(node => node.id === d.source);
+				var targetNode = nodes.find(node => node.id === d.target);
+
+				if (sourceNode && targetNode) {
+						return "M" + sourceNode.x + "," + sourceNode.y +
+									 "L" + targetNode.x + "," + targetNode.y;
+				}
+
+				return "";  // Handle the case when nodes are not found
+		})
+		.on("mouseover", function (d) {
+				console.log("Mouseover on link:", d);
+				// Add any additional debugging or visualization code here
+		});
+
+// Log link data and elements to console
+console.log("Links data:", links);
+console.log("Links elements:", link.nodes());
+simulation.nodes(nodes);
+simulation.force("link").links(links);
+simulation.on("tick", ticked);
+
+
+
+// Tick function
+function ticked() {
+		node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+		// Update straight lines
+		link.attr("d", function(d) {
+				return "M" + d.source.x + "," + d.source.y +
+							 "L" + d.target.x + "," + d.target.y;
+		});
+}
+
+
+
+		// Reload function
+		function reloadGraph() {
+				$.ajax({
+						url: "{{=URL('default', 'showflowchart')}}",
+						type: "GET",
+						dataType: "json",
+						success: function(response) {
+								nodes = response.jsonNodes;
+								links = response.jsonLinks;
+								console.log("Reloaded nodes:", nodes);
+								console.log("Reloaded links:", links);
+								//nodes = {{#=nodes}}
+								//links = {{#=links}}
+								// Update simulation with new data
+								simulation.nodes(nodes);
+								simulation.force("link").links(links);
+
+								// Update links and nodes
+								link = link.data(links);
+								link.exit().remove();
+								link = link.enter().append("line").merge(link)
+										.attr("class", "link")
+										.style("stroke", "#666")
+										.style("stroke-width", 5);
+
+								node = node.data(nodes);
+								node.exit().remove();
+								node = node.enter().append("g").merge(node)
+										.attr("class", "node")
+										.call(d3.drag()
+												.on("start", dragstarted)
+												.on("drag", dragged)
+												.on("end", dragended));
+
+								node.append("rect")
+										.attr("width", 80)
+										.attr("height", 40)
+										.attr("class", "node");
+
+								node.append("text")
+										.attr("dy", "1.3em")
+										.attr("x", 40)
+										.style("text-anchor", "middle")
+										.text(function(d) { return d.label; });
+
+								simulation.alpha(1).restart();
+						},
+						error: function() {
+								console.error("Error reloading 'showflowchart'.");
+						}
+				});
+		}
+// Reload the content every 3 seconds
+</script>
+<script>
+//    setInterval(function () {
+//    var newgraph = {{=XML(response.jsonNewGraph)}};
+//    alert(newgraph);
+//    if (newgraph == 1) {
+//        reloadGraph();
+//        newgraph = 0;
+//    }
+//}, 3000);
+//$(document).ready(function() {
+//    // jQuery code to select elements by class name
+//    $('.showflowchart_class').click(function() {
+				// Trigger the reload when an element with the specified class is clicked
+//        reloadGraph();
+//    });
+//});
+
+$(document).on('click', '.showflowchart_class', function() {
+
+		reloadFoundCollView();
+});
+//  $(document).ready(function() {
+//      $('.showflowchart_class').click(function() {
+						//loadFoundCollView();
+//      });
+//  });
+</script>
+<script>
+		function reloadFoundCollView() {
+				$.ajax({
+						url: "{{=URL('default', 'showflowchart')}}",
+						type: "GET",
+						success: function(response) {
+								// Replace the content of the hidden div with the reloaded view
+								$('#foundcoll').html(response);
+						},
+						error: function() {
+								console.error("Error reloading 'showflowchart'.");
+						}
+				});
+		}
+
+</script>
+<!-- Add a button to trigger the image copy -->
+
+<style>
+		#canvas{
+				margin-top:100%; padding: 0; bottom:0:border: 4px solid blue; position: relative; background-color: none; width: 100%; height: 100%;
+		}
+</style>
+<div id="output" ></div>
+<script>
+				// Define the function
+				// to screenshot the div
+				function takeshot() {
+						let div =
+								document.getElementById('graph-container');
+
+						// Use the html2canvas
+						// function to take a screenshot
+						// and append it
+						// to the output div
+						html2canvas(div).then(
+								function (canvas) {
+										document
+										.getElementById('output')
+										.appendChild(canvas);
+								})
+				}
+</script>
